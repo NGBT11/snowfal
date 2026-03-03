@@ -1,13 +1,11 @@
-﻿using System;
+﻿using SnowfallVillage;
+using System;
 using System.Windows.Forms;
 
-namespace SnowfallVillage
+namespace Snowfall
 {
     static class Program
     {
-        /// <summary>
-        /// Главная точка входа для приложения.
-        /// </summary>
         [STAThread]
         static void Main()
         {
