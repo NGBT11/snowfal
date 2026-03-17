@@ -63,16 +63,6 @@ namespace Snowfall {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap snowflake {
-            get {
-                object obj = ResourceManager.GetObject("snowflake", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap village {
             get {
                 object obj = ResourceManager.GetObject("village", resourceCulture);

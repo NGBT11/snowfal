@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Snowfall;
+using Snowfall.Properties;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Snowfall.Properties;
 
 namespace SnowfallVillage
 {
@@ -12,10 +13,19 @@ namespace SnowfallVillage
         private List<Bitmap> snowflakeVariants = new List<Bitmap>();
 
         private Bitmap villageBackground;
-        private Bitmap snowflakeSource; // БЫЛО: snowflakeImage
+        private Bitmap snowflakeSource;
 
         private Timer timer;
         private Random random = new Random();
+        private Bitmap buffer;
+
+        private const float MinScale = 0.35f;
+        private const float MaxScale = 1f;
+        private const double MinSpeed = 1.5;
+        private const double MaxSpeed = 6.5;
+        private const int SnowflakeCount = 100;
+
+
 
         public Form1()
         {
@@ -30,7 +40,6 @@ namespace SnowfallVillage
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
             BackColor = Color.Black;
-            DoubleBuffered = false; // По заданию
 
             KeyPreview = true;
             KeyDown += (s, e) => Application.Exit();
@@ -57,37 +66,10 @@ namespace SnowfallVillage
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            if (snowflakeSource == null) 
-            {
-                MessageBox.Show("Не найдена snowflake.png");
-                Close();
-                return;
-            }
 
-            PrepareSnowflakeVariants();
+            buffer = new Bitmap(Width, Height);
             CreateSnowflakes(100);
             StartAnimation();
-        }
-
-        private void PrepareSnowflakeVariants()
-        {
-            snowflakeVariants.Clear();
-
-            float[] scales = { 0.15f, 0.25f, 0.35f };
-
-            foreach (float scale in scales)
-            {
-                int w = (int)(snowflakeSource.Width * scale);
-                int h = (int)(snowflakeSource.Height * scale);
-
-                Bitmap bmp = new Bitmap(w, h);
-                using (Graphics g = Graphics.FromImage(bmp))
-                {
-                    g.DrawImage(snowflakeSource, 0, 0, w, h);
-                }
-
-                snowflakeVariants.Add(bmp);
-            }
         }
 
         private void CreateSnowflakes(int count)
@@ -96,17 +78,20 @@ namespace SnowfallVillage
 
             for (int i = 0; i < count; i++)
             {
-                Bitmap img = snowflakeVariants[random.Next(snowflakeVariants.Count)];
+                float scale = (float)(MinScale + (MaxScale - MinScale) * random.NextDouble());
+                double speed = MinSpeed + (MaxSpeed - MinSpeed) * ((scale - MinScale) / (MaxScale - MinScale));
 
                 snowflakes.Add(new Snowflake
                 {
                     X = random.Next(0, Width),
                     Y = random.Next(-Height, 0),
-                    Speed = 0.8 + img.Width * 0.05,
-                    Image = img
+                    Scale = scale,
+                    Speed = speed
                 });
             }
         }
+
+
 
         private void StartAnimation()
         {
@@ -129,24 +114,22 @@ namespace SnowfallVillage
                 var flake = snowflakes[i];
                 flake.Y += flake.Speed;
 
-
                 if (flake.Y > Height)
                 {
-                    Bitmap img = snowflakeVariants[random.Next(snowflakeVariants.Count)];
-
-                    flake.Y = random.Next(-200, -50); 
+                    flake.Y = random.Next(-200, -50);
                     flake.X = random.Next(0, Width);
-                    flake.Image = img;
-                    flake.Speed = 0.8 + img.Width * 0.05;
+                    flake.Scale = (float)(MinScale + (MaxScale - MinScale) * random.NextDouble());
+                    flake.Speed = MinSpeed + (MaxSpeed - MinSpeed) * ((flake.Scale - MinScale) / (MaxScale - MinScale));
                 }
 
                 snowflakes[i] = flake;
             }
         }
 
+
         private void DrawScene()
         {
-            using (Graphics g = CreateGraphics())
+            using (Graphics g = Graphics.FromImage(buffer))
             {
                 if (villageBackground != null)
                 {
@@ -161,27 +144,19 @@ namespace SnowfallVillage
                 {
                     if (flake.Y > -50 && flake.Y < Height + 50)
                     {
-                        g.DrawImage(
-                            flake.Image,
-                            (float)flake.X,
-                            (float)flake.Y
-                        );
+                        int w = (int)(snowflakeSource.Width * flake.Scale);
+                        int h = (int)(snowflakeSource.Height * flake.Scale);
+
+                        g.DrawImage(snowflakeSource, (float)flake.X, (float)flake.Y, w, h);
                     }
                 }
-
-
             }
-        }
 
-
-
-
-        public struct Snowflake
-        {
-            public double X;
-            public double Y;
-            public double Speed;
-            public Bitmap Image;
+            using (Graphics g = CreateGraphics())
+            {
+                g.DrawImage(buffer, 0, 0);
+            }
         }
     }
 }
+
