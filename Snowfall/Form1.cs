@@ -7,27 +7,34 @@ using System.Windows.Forms;
 
 namespace SnowfallVillage
 {
-    public partial class Form1 : Form
+    /// <summary>
+    /// Класс формы снегопада
+    /// </summary>
+    public partial class SnowfallFrom : Form
     {
-        private List<Snowflake> snowflakes = new List<Snowflake>();
-        private List<Bitmap> snowflakeVariants = new List<Bitmap>();
+        private readonly List<Snowflake> Snowflakes = new List<Snowflake>();
 
-        private Bitmap villageBackground;
-        private Bitmap snowflakeSource;
+        private Bitmap VillageBackground;
+        private Bitmap SnowflakeSource;
 
-        private Timer timer;
-        private Random random = new Random();
-        private Bitmap buffer;
+        private Timer Timer;
+        private readonly Random Random = new Random();
+        private Bitmap Buffer;
 
         private const float MinScale = 0.35f;
         private const float MaxScale = 1f;
         private const double MinSpeed = 1.5;
         private const double MaxSpeed = 6.5;
         private const int SnowflakeCount = 100;
+        private const int HighestSpawnPosition = -200;
+        private const int LowestSpawnPosition = -50;
+        private const int VisibilityPadding = 50;
 
 
-
-        public Form1()
+        /// <summary>
+        /// Ctor
+        /// </summary>
+        public SnowfallFrom()
         {
             InitializeComponent();
             SetupForm();
@@ -49,14 +56,17 @@ namespace SnowfallVillage
         {
             try
             {
-                // ЗАГРУЗКА ЧЕРЕЗ PROPERTIES.RESOURCES
-                villageBackground = Resources.village;
-                snowflakeSource = Resources.snowflake;
+                VillageBackground = Resources.village;
+                SnowflakeSource = Resources.snowflake;
 
-                if (villageBackground == null)
+                if (VillageBackground == null)
+                {
                     MessageBox.Show("village.jpg не найден в ресурсах");
-                if (snowflakeSource == null)
+                }
+                if (SnowflakeSource == null)
+                {
                     MessageBox.Show("snowflake.png не найден в ресурсах");
+                }
             }
             catch (Exception ex)
             {
@@ -66,39 +76,38 @@ namespace SnowfallVillage
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-
-            buffer = new Bitmap(Width, Height);
-            CreateSnowflakes(100);
+            Buffer = new Bitmap(Width, Height);
+            CreateSnowflakes(SnowflakeCount);
             StartAnimation();
         }
 
         private void CreateSnowflakes(int count)
         {
-            snowflakes.Clear();
+            Snowflakes.Clear();
 
-            for (int i = 0; i < count; i++)
+            for (var flakeCounter = 0; flakeCounter < count; flakeCounter++)
             {
-                float scale = (float)(MinScale + (MaxScale - MinScale) * random.NextDouble());
-                double speed = MinSpeed + (MaxSpeed - MinSpeed) * ((scale - MinScale) / (MaxScale - MinScale));
+                var scale = (float)(MinScale + (MaxScale - MinScale) * Random.NextDouble());
+                var speed = MinSpeed + (MaxSpeed - MinSpeed) * ((scale - MinScale) / (MaxScale - MinScale));
 
-                snowflakes.Add(new Snowflake
+                Snowflakes.Add(new Snowflake
                 {
-                    X = random.Next(0, Width),
-                    Y = random.Next(-Height, 0),
+                    PosX = Random.Next(0, Width),
+                    PosY = Random.Next(-Height, 0),
                     Scale = scale,
                     Speed = speed
                 });
             }
         }
 
-
-
         private void StartAnimation()
         {
-            timer = new Timer();
-            timer.Interval = 40;
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            Timer = new Timer
+            {
+                Interval = 40
+            };
+            Timer.Tick += Timer_Tick;
+            Timer.Start();
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -109,52 +118,52 @@ namespace SnowfallVillage
 
         private void UpdateSnowflakes()
         {
-            for (int i = 0; i < snowflakes.Count; i++)
+            for (int flakeCounter = 0; flakeCounter < Snowflakes.Count; flakeCounter++)
             {
-                var flake = snowflakes[i];
-                flake.Y += flake.Speed;
+                var flake = Snowflakes[flakeCounter];
+                flake.PosY += flake.Speed;
 
-                if (flake.Y > Height)
+                if (flake.PosY > Height)
                 {
-                    flake.Y = random.Next(-200, -50);
-                    flake.X = random.Next(0, Width);
-                    flake.Scale = (float)(MinScale + (MaxScale - MinScale) * random.NextDouble());
+                    flake.PosY = Random.Next(HighestSpawnPosition, LowestSpawnPosition);
+                    flake.PosX = Random.Next(0, Width);
+                    flake.Scale = (float)(MinScale + (MaxScale - MinScale) * Random.NextDouble());
                     flake.Speed = MinSpeed + (MaxSpeed - MinSpeed) * ((flake.Scale - MinScale) / (MaxScale - MinScale));
                 }
 
-                snowflakes[i] = flake;
+                Snowflakes[flakeCounter] = flake;
             }
         }
 
 
         private void DrawScene()
         {
-            using (Graphics g = Graphics.FromImage(buffer))
+            using (Graphics graphic = Graphics.FromImage(Buffer))
             {
-                if (villageBackground != null)
+                if (VillageBackground != null)
                 {
-                    g.DrawImage(villageBackground, 0, 0, Width, Height);
+                    graphic.DrawImage(VillageBackground, 0, 0, Width, Height);
                 }
                 else
                 {
-                    g.Clear(Color.Black);
+                    graphic.Clear(Color.Black);
                 }
 
-                foreach (var flake in snowflakes)
+                foreach (var flake in Snowflakes)
                 {
-                    if (flake.Y > -50 && flake.Y < Height + 50)
+                    if (flake.PosY > -VisibilityPadding && flake.PosY < Height + VisibilityPadding)
                     {
-                        int w = (int)(snowflakeSource.Width * flake.Scale);
-                        int h = (int)(snowflakeSource.Height * flake.Scale);
+                        var width = (int)(SnowflakeSource.Width * flake.Scale);
+                        var height = (int)(SnowflakeSource.Height * flake.Scale);
 
-                        g.DrawImage(snowflakeSource, (float)flake.X, (float)flake.Y, w, h);
+                        graphic.DrawImage(SnowflakeSource, (float)flake.PosX, (float)flake.PosY, width, height);
                     }
                 }
             }
 
-            using (Graphics g = CreateGraphics())
+            using (Graphics graphic = CreateGraphics())
             {
-                g.DrawImage(buffer, 0, 0);
+                graphic.DrawImage(Buffer, 0, 0);
             }
         }
     }

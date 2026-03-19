@@ -1,6 +1,6 @@
 ﻿namespace SnowfallVillage
 {
-    partial class Form1
+    partial class SnowfallFrom
     {
         /// <summary>
         /// Обязательная переменная конструктора.
