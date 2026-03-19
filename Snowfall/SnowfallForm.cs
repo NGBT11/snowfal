@@ -37,19 +37,8 @@ namespace SnowfallVillage
         public SnowfallFrom()
         {
             InitializeComponent();
-            SetupForm();
             LoadImagesFromResources();
             Shown += Form1_Shown;
-        }
-
-        private void SetupForm()
-        {
-            FormBorderStyle = FormBorderStyle.None;
-            WindowState = FormWindowState.Maximized;
-            BackColor = Color.Black;
-
-            KeyPreview = true;
-            KeyDown += (s, e) => Application.Exit();
         }
 
         private void LoadImagesFromResources()
@@ -165,6 +154,11 @@ namespace SnowfallVillage
             {
                 graphic.DrawImage(Buffer, 0, 0);
             }
+        }
+
+        private void SnowfallFrom_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

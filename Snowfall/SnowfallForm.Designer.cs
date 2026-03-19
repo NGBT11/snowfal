@@ -1,4 +1,7 @@
-﻿namespace SnowfallVillage
+﻿using System.Drawing;
+using System.Windows.Forms;
+
+namespace SnowfallVillage
 {
     partial class SnowfallFrom
     {
@@ -28,10 +31,22 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // SnowfallFrom
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.KeyPreview = true;
+            this.Name = "SnowfallFrom";
             this.Text = "Снегопад в Деревне";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SnowfallFrom_KeyPress);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
